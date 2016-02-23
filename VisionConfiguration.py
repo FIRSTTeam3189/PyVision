@@ -155,6 +155,20 @@ class VisionConfiguration:
         """
         self.__kernel_size_open = size
 
+    def set_should_close(self, should_close):
+        """
+        Sets if the vision should run the morphology close operation after open
+        :param should_close: To close the threshold
+        """
+        self.__should_close = should_close
+
+    def set_should_open(self, should_open):
+        """
+        Sets if the vision should run the morphology open operation
+        :param should_open: To close the threshold
+        """
+        self.__should_open = should_open
+
     def get_low_range(self):
         """
         Gets the value of the low range as a numpy array of uint8
@@ -183,6 +197,20 @@ class VisionConfiguration:
         """
         return np.ones((self.__kernel_size_open, self.__kernel_size_open), np.uint8)
 
+    def get_should_close(self):
+        """
+        Gets if the vision should run the close morphology operation after opening operation
+        :return: If the vision should run the close morphology operation
+        """
+        return self.__should_close
+
+    def get_should_open(self):
+        """
+        Gets of the vision should run the open morphology operation
+        :return: If the vision should run the open morphology operation
+        """
+        return self.__should_open
+
     def save(self, file_location=None, validate=True):
         """
         Saves the config file to the given location, or the same file read from if not given
@@ -194,6 +222,9 @@ class VisionConfiguration:
 
         if validate:
             self.validate()
+
+        # Write the changes to the config object
+        self.__sync(False)
 
         with open(file_location, 'wb') as config_file:
             self.__config.write(config_file)
