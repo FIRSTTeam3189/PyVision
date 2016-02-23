@@ -9,17 +9,18 @@ module of the Raspberry Pi Vision System
 
 # Keys for Threshold section
 THRESHOLD_SECTION = "color_ranges"
-RED_LOW_KEY = "red_low"
-RED_HIGH_KEY = "red_high"
-GREEN_LOW_KEY = "green_low"
-GREEN_HIGH_KEY = "green_high"
-BLUE_LOW_KEY = "blue_low"
-BLUE_HIGH_KEY = "blue_high"
+THREE_LOW_KEY = "three_low"
+THREE_HIGH_KEY = "three_high"
+TWO_LOW_KEY = "two_low"
+TWO_HIGH_KEY = "two_high"
+ONE_LOW_KEY = "one_low"
+ONE_HIGH_KEY = "one_high"
 
 # Keys for Processing section
 PROCESSING_SECTION = "processing"
 SHOULD_CLOSE_KEY = "should_close"
 SHOULD_OPEN_KEY = "should_open"
+SHOULD_USE_HSV_KEY = "should_use_hsv"
 OPEN_KERNEL_KEY = "open_kernel_size"
 CLOSE_KERNEL_KEY = "close_kernel_size"
 
@@ -65,81 +66,82 @@ class VisionConfiguration:
 
     def __init__(self, file_location):
         # Config values
-        self.__red_low = 0
-        self.__red_high = 255
-        self.__blue_low = 0
-        self.__blue_high = 255
-        self.__green_low = 0
-        self.__green_high = 255
+        self.__one_low = 0
+        self.__one_high = 255
+        self.__two_low = 0
+        self.__two_high = 255
+        self.__three_low = 0
+        self.__three_high = 255
         self.__kernel_size_close = 1
         self.__kernel_size_open = 1
         self.__should_close = True
         self.__should_open = True
+        self.__should_use_hsv = True
 
         # Configuration file loading
         self.__config = cP.RawConfigParser()
         self.__config.read(file_location)
         self.__default_location = file_location
 
-    def set_red_low(self, red):
+    def set_one_low(self, one):
         """
-        Sets the red low value of the configuration
-        :param red: The new red value
+        Sets the blue/hue low value of the configuration
+        :param one: The new blue/hue value
         """
-        if red > self.__red_high:
-            red = self.__red_high
+        if one > self.__one_high:
+            one = self.__one_high
 
-        self.__red_low = red
+        self.__one_low = one
 
-    def set_red_high(self, red):
+    def set_one_high(self, one):
         """
-        Sets the red high value of the configuration
-        :param red: The new red value
+        Sets the blue/hue high value of the configuration
+        :param one: The new blue/hue value
         """
-        if red < self.__red_low:
-            red = self.__red_low
+        if one < self.__one_low:
+            one = self.__one_low
 
-        self.__red_high = red
+        self.__one_high = one
 
-    def set_green_low(self, green):
+    def set_two_low(self, two):
         """
-        Sets the green low value of the configuration
-        :param green: The new green value
+        Sets the green/saturation low value of the configuration
+        :param two: The new green/saturation value
         """
-        if green > self.__green_high:
-            green = self.__green_high
+        if two > self.__two_high:
+            two = self.__two_high
 
-        self.__green_low = green
+        self.__two_low = two
 
-    def set_green_high(self, green):
+    def set_two_high(self, two):
         """
-        Sets the green high value of the configuration
-        :param green: The new green value
+        Sets the green/saturation high value of the configuration
+        :param two: The new green/saturation value
         """
-        if green < self.__green_low:
-            green = self.__green_low
+        if two < self.__two_low:
+            two = self.__two_low
 
-        self.__green_high = green
+        self.__two_high = two
 
-    def set_blue_low(self, blue):
+    def set_three_low(self, three):
         """
-        Sets the blue low value of the configuration
-        :param blue: The new blue value
+        Sets the red/value low value of the configuration
+        :param three: The new red/value value
         """
-        if blue > self.__blue_high:
-            blue = self.__blue_high
+        if three > self.__three_high:
+            three = self.__three_high
 
-        self.__blue_low = blue
+        self.__three_low = three
 
-    def set_blue_high(self, blue):
+    def set_three_high(self, three):
         """
-        Sets the blue high value of the configuration
-        :param blue: The new blue value
+        Sets the red/value high value of the configuration
+        :param three: The new red/value value
         """
-        if blue < self.__blue_low:
-            blue = self.__blue_low
+        if three < self.__three_low:
+            three = self.__three_low
 
-        self.__blue_high = blue
+        self.__three_high = three
 
     def set_kernel_close_size(self, size):
         """
@@ -169,19 +171,27 @@ class VisionConfiguration:
         """
         self.__should_open = should_open
 
+    def set_should_use_hsv(self, should_use_hsv):
+        """
+        Sets if the vision should use HSV Ranges instead of RGB
+        :param should_use_hsv: Use HSV Ranges
+        :return:
+        """
+        self.__should_use_hsv = should_use_hsv
+
     def get_low_range(self):
         """
         Gets the value of the low range as a numpy array of uint8
         :return: The numpy array for the low values
         """
-        return np.array([self.__blue_low, self.__green_low, self.__red_low], dtype=np.uint8)
+        return np.array([self.__one_low, self.__two_low, self.__three_low], dtype=np.uint8)
 
     def get_high_range(self):
         """
         Gets the value of the high range as a numpy array of uint8
         :return: The numpy array for the high values
         """
-        return np.array([self.__blue_high, self.__green_high, self.__red_high], dtype=np.uint8)
+        return np.array([self.__one_high, self.__two_high, self.__three_high], dtype=np.uint8)
 
     def get_kernel_close(self):
         """
@@ -211,6 +221,13 @@ class VisionConfiguration:
         """
         return self.__should_open
 
+    def get_should_use_hsv(self):
+        """
+        Gets if the vision should use HSV Values instead of RGB
+        :return: If the vision should use hsv
+        """
+        return self.__should_use_hsv
+
     def save(self, file_location=None, validate=True):
         """
         Saves the config file to the given location, or the same file read from if not given
@@ -234,29 +251,29 @@ class VisionConfiguration:
         Sets the ranges to their proper values if they aren't already
         """
         # Validate types
-        if type(self.__blue_low) is not int:
-            self.__blue_low = MIN_COLOR_VALUE
-            logger.debug("Blue low not int, setting to 0")
+        if type(self.__two_low) is not int:
+            self.__two_low = MIN_COLOR_VALUE
+            logger.debug("Green/Saturation low not int, setting to 0")
 
-        if type(self.__green_low) is not int:
-            self.__green_low = MIN_COLOR_VALUE
-            logger.debug("Green low not int, setting to 0")
+        if type(self.__three_low) is not int:
+            self.__three_low = MIN_COLOR_VALUE
+            logger.debug("Red/Value low not int, setting to 0")
 
-        if type(self.__red_low) is not int:
-            self.__red_low = MIN_COLOR_VALUE
-            logger.debug("Red low not int, setting to 0")
+        if type(self.__one_low) is not int:
+            self.__one_low = MIN_COLOR_VALUE
+            logger.debug("Blue/Hue low not int, setting to 0")
 
-        if type(self.__blue_high) is not int:
-            self.__blue_high = MAX_COLOR_VALUE
-            logger.debug("Blue high not int, setting to 255")
+        if type(self.__two_high) is not int:
+            self.__two_high = MAX_COLOR_VALUE
+            logger.debug("Green/Saturation high not int, setting to 255")
 
-        if type(self.__green_high) is not int:
-            self.__green_high = MAX_COLOR_VALUE
-            logger.debug("Green high not int, setting to 255")
+        if type(self.__three_high) is not int:
+            self.__three_high = MAX_COLOR_VALUE
+            logger.debug("Red/Value high not int, setting to 255")
 
-        if type(self.__red_high) is not int:
-            self.__red_high = MAX_COLOR_VALUE
-            logger.debug("Red high not int, setting to 255")
+        if type(self.__one_high) is not int:
+            self.__one_high = MAX_COLOR_VALUE
+            logger.debug("Blue/Hue high not int, setting to 255")
 
         if type(self.__kernel_size_close) is not int:
             self.__kernel_size_close = MIN_KERNEL_VALUE
@@ -274,13 +291,17 @@ class VisionConfiguration:
             self.__should_open = True
             logger.debug("Kernel Should Open not bool, setting to True")
 
+        if type(self.__should_use_hsv) is not bool:
+            self.__should_use_hsv = True
+            logger.debug("Should use HSV not bool, setting to True")
+
         # Clamp Values
-        self.__blue_low = clamp(self.__blue_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Blue Low")
-        self.__red_low = clamp(self.__red_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Red Low")
-        self.__green_low = clamp(self.__green_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Green Low")
-        self.__blue_high = clamp(self.__blue_high, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Blue High")
-        self.__red_high = clamp(self.__red_high, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Red High")
-        self.__green_high = clamp(self.__green_high, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Green High")
+        self.__two_low = clamp(self.__two_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Green/Saturation Low")
+        self.__one_low = clamp(self.__one_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Blue/Hue Low")
+        self.__three_low = clamp(self.__three_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Red/Value Low")
+        self.__two_high = clamp(self.__two_high, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Green/Saturation High")
+        self.__one_high = clamp(self.__one_high, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Blue/Hue High")
+        self.__three_high = clamp(self.__three_high, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Red/Value High")
         self.__kernel_size_close = clamp(self.__kernel_size_close, MIN_KERNEL_VALUE, MAX_KERNEL_VALUE,
                                          "Kernel Size Close")
         self.__kernel_size_open = clamp(self.__kernel_size_open, MIN_KERNEL_VALUE, MAX_KERNEL_VALUE, "Kernel Size Open")
@@ -295,28 +316,30 @@ class VisionConfiguration:
     def __sync(self, read_from_config=True):
         if read_from_config:
             # Get the values from the config
-            self.__blue_low = self.__try_get_key(THRESHOLD_SECTION, BLUE_LOW_KEY, MIN_COLOR_VALUE)
-            self.__blue_high = self.__try_get_key(THRESHOLD_SECTION, BLUE_HIGH_KEY, MAX_COLOR_VALUE)
-            self.__green_low = self.__try_get_key(THRESHOLD_SECTION, GREEN_LOW_KEY, MIN_COLOR_VALUE)
-            self.__green_high = self.__try_get_key(THRESHOLD_SECTION, GREEN_HIGH_KEY, MAX_COLOR_VALUE)
-            self.__red_low = self.__try_get_key(THRESHOLD_SECTION, RED_LOW_KEY, MIN_COLOR_VALUE)
-            self.__red_high = self.__try_get_key(THRESHOLD_SECTION, RED_HIGH_KEY, MAX_COLOR_VALUE)
+            self.__two_low = self.__try_get_key(THRESHOLD_SECTION, TWO_LOW_KEY, MIN_COLOR_VALUE)
+            self.__two_high = self.__try_get_key(THRESHOLD_SECTION, TWO_HIGH_KEY, MAX_COLOR_VALUE)
+            self.__three_low = self.__try_get_key(THRESHOLD_SECTION, THREE_LOW_KEY, MIN_COLOR_VALUE)
+            self.__three_high = self.__try_get_key(THRESHOLD_SECTION, THREE_HIGH_KEY, MAX_COLOR_VALUE)
+            self.__one_low = self.__try_get_key(THRESHOLD_SECTION, ONE_LOW_KEY, MIN_COLOR_VALUE)
+            self.__one_high = self.__try_get_key(THRESHOLD_SECTION, ONE_HIGH_KEY, MAX_COLOR_VALUE)
             self.__kernel_size_close = self.__try_get_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, MIN_KERNEL_VALUE)
             self.__kernel_size_open = self.__try_get_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, MIN_KERNEL_VALUE)
-            self.__should_close = self.__try_get_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, False, True)
-            self.__should_open = self.__try_get_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, False, True)
+            self.__should_close = self.__try_get_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, True, True)
+            self.__should_open = self.__try_get_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, True, True)
+            self.__should_use_hsv = self.__try_get_key(PROCESSING_SECTION, SHOULD_USE_HSV_KEY, True, True)
         else:
             # Sets the values to the config
-            self.__set_key(THRESHOLD_SECTION, BLUE_LOW_KEY, self.__blue_low)
-            self.__set_key(THRESHOLD_SECTION, BLUE_HIGH_KEY, self.__blue_high)
-            self.__set_key(THRESHOLD_SECTION, GREEN_LOW_KEY, self.__green_low)
-            self.__set_key(THRESHOLD_SECTION, GREEN_HIGH_KEY, self.__green_high)
-            self.__set_key(THRESHOLD_SECTION, RED_LOW_KEY, self.__red_low)
-            self.__set_key(THRESHOLD_SECTION, RED_HIGH_KEY, self.__red_high)
+            self.__set_key(THRESHOLD_SECTION, TWO_LOW_KEY, self.__two_low)
+            self.__set_key(THRESHOLD_SECTION, TWO_HIGH_KEY, self.__two_high)
+            self.__set_key(THRESHOLD_SECTION, THREE_LOW_KEY, self.__three_low)
+            self.__set_key(THRESHOLD_SECTION, THREE_HIGH_KEY, self.__three_high)
+            self.__set_key(THRESHOLD_SECTION, ONE_LOW_KEY, self.__one_low)
+            self.__set_key(THRESHOLD_SECTION, ONE_HIGH_KEY, self.__one_high)
             self.__set_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, self.__kernel_size_close)
             self.__set_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, self.__kernel_size_open)
             self.__set_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, self.__should_close)
             self.__set_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, self.__should_open)
+            self.__set_key(PROCESSING_SECTION, SHOULD_USE_HSV_KEY, self.__should_use_hsv)
 
     def __set_key(self, section, key, value):
         # Tries to add the section if needed then setting the value
