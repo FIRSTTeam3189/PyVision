@@ -41,3 +41,9 @@ class VisionProcessor:
         # For now just use a color range
         range_image = cv2.inRange(image, self.config.get_low_range(), self.config.get_high_range())
         return range_image
+
+    def __smooth(self, image):
+        pass
+
+    def __remove_noise(self, image):
+        pass

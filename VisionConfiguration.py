@@ -21,8 +21,11 @@ PROCESSING_SECTION = "processing"
 SHOULD_CLOSE_KEY = "should_close"
 SHOULD_OPEN_KEY = "should_open"
 SHOULD_USE_HSV_KEY = "should_use_hsv"
+SHOULD_SMOOTH_KEY = "use_bilateral_smooth"
 OPEN_KERNEL_KEY = "open_kernel_size"
 CLOSE_KERNEL_KEY = "close_kernel_size"
+SMOOTH_KERNEL_KEY = "bilateral_kernel_size"
+
 
 # Range values for color range
 MIN_COLOR_VALUE = 0
@@ -59,6 +62,7 @@ def clamp(x, low, high, debug_with=None):
     return x
 
 
+# noinspection PyAttributeOutsideInit
 class VisionConfiguration:
     """
     This class is for the configuration of the vision system of the Raspberry Pi
@@ -145,6 +149,13 @@ class VisionConfiguration:
         """
         self.__kernel_size_open = size
 
+    def set_kernel_smoothing_size(self, size):
+        """
+        Sets the kernel smoothing size
+        :param size: The size of the kernel size smooth
+        """
+        self.__kernel_size_smooth = size
+
     def set_should_close(self, should_close):
         """
         Sets if the vision should run the morphology close operation after open
@@ -163,9 +174,15 @@ class VisionConfiguration:
         """
         Sets if the vision should use HSV Ranges instead of RGB
         :param should_use_hsv: Use HSV Ranges
-        :return:
         """
         self.__should_use_hsv = should_use_hsv
+
+    def set_should_use_smoothing(self, should_smooth):
+        """
+        Sets if the vision should use smoothing
+        :param should_smooth: If the vision should smooth
+        """
+        self.__should_use_smoothing = should_smooth
 
     def get_low_range(self):
         """
@@ -195,6 +212,13 @@ class VisionConfiguration:
         """
         return np.ones((self.__kernel_size_open, self.__kernel_size_open), np.uint8)
 
+    def get_kernel_smooth(self):
+        """
+        Gets the value of the kernel size as a numpy matrix of 1's of the kernel size by the kernel size
+        :return: The numpy matrix of the smoothing kernel
+        """
+        return np.ones((self.__kernel_size_smooth, self.__kernel_size_smooth), np.uint8)
+
     def get_should_close(self):
         """
         Gets if the vision should run the close morphology operation after opening operation
@@ -215,6 +239,13 @@ class VisionConfiguration:
         :return: If the vision should use hsv
         """
         return self.__should_use_hsv
+
+    def get_should_smooth(self):
+        """
+        Gets if the vision should use a smoothing operation
+        :return: If the vision should smooth
+        """
+        return self.__should_use_smoothing
 
     def save(self, file_location=None, validate=True):
         """
@@ -271,6 +302,10 @@ class VisionConfiguration:
             self.__kernel_size_open = MIN_KERNEL_VALUE
             logger.debug("Kernel size open not int, setting to 0")
 
+        if type(self.__kernel_size_smooth) is not int:
+            self.__kernel_size_smooth = MIN_KERNEL_VALUE
+            logger.debug("Kernel size smooth not int, setting to 0")
+
         if type(self.__should_close) is not bool:
             self.__should_close = True
             logger.debug("Kernel Should Close not bool, setting to True")
@@ -283,6 +318,10 @@ class VisionConfiguration:
             self.__should_use_hsv = True
             logger.debug("Should use HSV not bool, setting to True")
 
+        if type(self.__should_use_smoothing) is not bool:
+            self.__should_use_smoothing = True
+            logger.debug("Should use smoothing not bool, setting to True")
+
         # Clamp Values
         self.__two_low = clamp(self.__two_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Green/Saturation Low")
         self.__one_low = clamp(self.__one_low, MIN_COLOR_VALUE, MAX_COLOR_VALUE, "Blue/Hue Low")
@@ -293,6 +332,8 @@ class VisionConfiguration:
         self.__kernel_size_close = clamp(self.__kernel_size_close, MIN_KERNEL_VALUE, MAX_KERNEL_VALUE,
                                          "Kernel Size Close")
         self.__kernel_size_open = clamp(self.__kernel_size_open, MIN_KERNEL_VALUE, MAX_KERNEL_VALUE, "Kernel Size Open")
+        self.__kernel_size_smooth = clamp(self.__kernel_size_smooth, MIN_KERNEL_VALUE, MAX_KERNEL_VALUE,
+                                          "Kernel Size Smooth")
 
     def __add_section(self, section):
         # Try to add the section if it doesnt exit
@@ -312,9 +353,11 @@ class VisionConfiguration:
             self.__one_high = self.__try_get_key(THRESHOLD_SECTION, ONE_HIGH_KEY, MAX_COLOR_VALUE)
             self.__kernel_size_close = self.__try_get_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, MIN_KERNEL_VALUE)
             self.__kernel_size_open = self.__try_get_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, MIN_KERNEL_VALUE)
+            self.__kernel_size_smooth = self.__try_get_key(PROCESSING_SECTION, SMOOTH_KERNEL_KEY, MIN_KERNEL_VALUE)
             self.__should_close = self.__try_get_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, True, True)
             self.__should_open = self.__try_get_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, True, True)
             self.__should_use_hsv = self.__try_get_key(PROCESSING_SECTION, SHOULD_USE_HSV_KEY, True, True)
+            self.__should_use_smoothing = self.__try_get_key(PROCESSING_SECTION, SHOULD_SMOOTH_KEY, True, True)
         else:
             # Sets the values to the config
             self.__set_key(THRESHOLD_SECTION, TWO_LOW_KEY, self.__two_low)
@@ -325,9 +368,11 @@ class VisionConfiguration:
             self.__set_key(THRESHOLD_SECTION, ONE_HIGH_KEY, self.__one_high)
             self.__set_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, self.__kernel_size_close)
             self.__set_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, self.__kernel_size_open)
+            self.__set_key(PROCESSING_SECTION, SMOOTH_KERNEL_KEY, self.__kernel_size_smooth)
             self.__set_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, self.__should_close)
             self.__set_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, self.__should_open)
             self.__set_key(PROCESSING_SECTION, SHOULD_USE_HSV_KEY, self.__should_use_hsv)
+            self.__set_key(PROCESSING_SECTION, SHOULD_SMOOTH_KEY, self.__should_use_smoothing)
 
     def __set_key(self, section, key, value):
         # Tries to add the section if needed then setting the value
