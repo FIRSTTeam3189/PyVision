@@ -38,12 +38,14 @@ class VisionProcessor:
         return close_image
 
     def convex_hull_image(self, image):
-        contour_image, contours, hirarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        copy_image = image.copy()
+        contour_image, contours, hierarchy = cv2.findContours(copy_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         hull_image = contour_image
         for (i, c) in enumerate(contours):
-            hull = cv2.convexHull(c)
-            hull_image = cv2.drawContours(hull_image, hull, -1, (255, 255, 255), -1)
+            epsilon = .1 * cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, epsilon, True)
+            hull_image = cv2.drawContours(hull_image, approx, -1, (255, 255, 255), cv2.FILLED)
 
         return hull_image
 
