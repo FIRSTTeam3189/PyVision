@@ -1,5 +1,7 @@
 import numpy as np
 import cv2
+import VisionConfiguration
+import VisionProcessor
 
 
 def nothing(x):
@@ -22,6 +24,71 @@ def clamp(x, low, high):
         x = high
 
     return x
+
+
+def test():
+    print('Version: ' + cv2.__version__)
+
+    # Get video capture
+    cap = cv2.VideoCapture(0)
+
+    # Keys for the window
+    window_key = 'Image'
+    r_low_key = 'H Low'
+    r_high_key = 'H High'
+    g_low_key = 'S Low'
+    g_high_key = 'S High'
+    b_low_key = 'V Low'
+    b_high_key = 'V High'
+    kernel_size_key = 'Kernel Size'
+
+    # Setup Window
+    cv2.namedWindow(window_key)
+    cv2.createTrackbar(r_low_key, window_key, 0, 255, nothing)
+    cv2.createTrackbar(g_low_key, window_key, 0, 255, nothing)
+    cv2.createTrackbar(b_low_key, window_key, 0, 255, nothing)
+    cv2.createTrackbar(r_high_key, window_key, 0, 255, nothing)
+    cv2.createTrackbar(g_high_key, window_key, 0, 255, nothing)
+    cv2.createTrackbar(b_high_key, window_key, 0, 255, nothing)
+    cv2.createTrackbar(kernel_size_key, window_key, 1, 10, nothing)
+
+    config = VisionConfiguration.VisionConfiguration("settings.conf")
+    vp = VisionProcessor.VisionProcessor(config)
+
+    cv2.setTrackbarPos(r_low_key, window_key, config.get_low_range()[0])
+    cv2.setTrackbarPos(g_low_key, window_key, config.get_low_range()[1])
+    cv2.setTrackbarPos(b_low_key, window_key, config.get_low_range()[2])
+    cv2.setTrackbarPos(r_high_key, window_key, config.get_high_range()[0])
+    cv2.setTrackbarPos(g_high_key, window_key, config.get_high_range()[1])
+    cv2.setTrackbarPos(b_high_key, window_key, config.get_high_range()[2])
+
+    while True:
+        ret, frame = cap.read()
+
+        # Get RGB Values
+        r_low = cv2.getTrackbarPos(r_low_key, window_key)
+        g_low = cv2.getTrackbarPos(g_low_key, window_key)
+        b_low = cv2.getTrackbarPos(b_low_key, window_key)
+        r_high = cv2.getTrackbarPos(r_high_key, window_key)
+        g_high = cv2.getTrackbarPos(g_high_key, window_key)
+        b_high = cv2.getTrackbarPos(b_high_key, window_key)
+
+        # Set the values of the config file
+        config.set_one_low(r_low)
+        config.set_two_low(g_low)
+        config.set_three_low(b_low)
+        config.set_one_high(r_high)
+        config.set_two_high(g_high)
+        config.set_three_high(b_high)
+
+        processed = vp.process_frame(frame, config)
+        cv2.imshow(window_key, processed)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+    config.save()
 
 
 def main():
