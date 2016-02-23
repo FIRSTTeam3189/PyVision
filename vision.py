@@ -61,6 +61,7 @@ def test():
     cv2.setTrackbarPos(r_high_key, window_key, config.get_high_range()[0])
     cv2.setTrackbarPos(g_high_key, window_key, config.get_high_range()[1])
     cv2.setTrackbarPos(b_high_key, window_key, config.get_high_range()[2])
+    cv2.setTrackbarPos(kernel_size_key, window_key, config.get_kernel_size_open())
 
     while True:
         ret, frame = cap.read()
@@ -72,6 +73,7 @@ def test():
         r_high = cv2.getTrackbarPos(r_high_key, window_key)
         g_high = cv2.getTrackbarPos(g_high_key, window_key)
         b_high = cv2.getTrackbarPos(b_high_key, window_key)
+        open_close_size = cv2.getTrackbarPos(kernel_size_key, window_key)
 
         # Set the values of the config file
         config.set_one_low(r_low)
@@ -80,9 +82,13 @@ def test():
         config.set_one_high(r_high)
         config.set_two_high(g_high)
         config.set_three_high(b_high)
+        config.set_kernel_open_size(open_close_size)
+        config.set_kernel_close_size(open_close_size)
 
         processed = vp.process_frame(frame, config)
+        hull = vp.convex_hull_image(processed)
         cv2.imshow(window_key, processed)
+        cv2.imshow('Hull', hull)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

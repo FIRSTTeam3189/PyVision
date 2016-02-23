@@ -26,7 +26,6 @@ OPEN_KERNEL_KEY = "open_kernel_size"
 CLOSE_KERNEL_KEY = "close_kernel_size"
 SMOOTH_KERNEL_KEY = "bilateral_kernel_size"
 
-
 # Range values for color range
 MIN_COLOR_VALUE = 0
 MAX_COLOR_VALUE = 255
@@ -205,6 +204,13 @@ class VisionConfiguration:
         """
         return np.ones((self.__kernel_size_close, self.__kernel_size_close), np.uint8)
 
+    def get_kernel_size_close(self):
+        """
+        Gets the size of the close kernel
+        :return: The size
+        """
+        return self.__kernel_size_close
+
     def get_kernel_open(self):
         """
         Gets the value of the kernel size as a numpy matrix of 1's of the kernel size by the kernel size
@@ -212,12 +218,26 @@ class VisionConfiguration:
         """
         return np.ones((self.__kernel_size_open, self.__kernel_size_open), np.uint8)
 
+    def get_kernel_size_open(self):
+        """
+        Gets the size of the open kernel
+        :return: The size
+        """
+        return self.__kernel_size_open
+
     def get_kernel_smooth(self):
         """
         Gets the value of the kernel size as a numpy matrix of 1's of the kernel size by the kernel size
         :return: The numpy matrix of the smoothing kernel
         """
         return np.ones((self.__kernel_size_smooth, self.__kernel_size_smooth), np.uint8)
+
+    def get_kernel_size_smooth(self):
+        """
+        Gets the size of the smoothing kernel
+        :return: The size of the smoothing kernel
+        """
+        return self.__kernel_size_smooth
 
     def get_should_close(self):
         """

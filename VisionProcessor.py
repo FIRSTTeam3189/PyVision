@@ -9,6 +9,7 @@ This module is for Processing the image into an image that we can calculate wher
 
 logger = logging.getLogger('VisionProcessor')
 
+
 class VisionProcessor:
     """
     This is used to process the image to bring out the target clearly
@@ -29,7 +30,22 @@ class VisionProcessor:
         if config is not None:
             self.config = config
 
-        return self.__threshold(image)
+        smooth_image = self.__smooth(image)
+        range_image = self.__threshold(smooth_image)
+        open_image = self.__open(range_image)
+        close_image = self.__close(open_image)
+
+        return close_image
+
+    def convex_hull_image(self, image):
+        contour_image, contours, hirarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        hull_image = contour_image
+        for (i, c) in enumerate(contours):
+            hull = cv2.convexHull(c)
+            hull_image = cv2.drawContours(hull_image, hull, -1, (255, 255, 255), -1)
+
+        return hull_image
 
     def __threshold(self, image):
         # If we should use HSV, convert it here
@@ -43,7 +59,25 @@ class VisionProcessor:
         return range_image
 
     def __smooth(self, image):
-        pass
+        if not self.config.get_should_smooth():
+            return image
 
-    def __remove_noise(self, image):
-        pass
+        # Only smooth image if needed
+        smooth_image = cv2.bilateralFilter(image, self.config.get_kernel_size_smooth(), 150, 150)
+        return smooth_image
+
+    def __open(self, image):
+        if not self.config.get_should_open():
+            return image
+
+        # Only open image if needed
+        open_image = cv2.morphologyEx(image, cv2.MORPH_OPEN, self.config.get_kernel_open())
+        return open_image
+
+    def __close(self, image):
+        if not self.config.get_should_close():
+            return image
+
+        # Only close image if needed
+        close_image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, self.config.get_kernel_close())
+        return close_image
