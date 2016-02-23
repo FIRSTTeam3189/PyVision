@@ -88,7 +88,8 @@ def test():
 
     cap.release()
     cv2.destroyAllWindows()
-    config.save()
+    print("Closing")
+    config.save("settings.conf")
 
 
 def main():
@@ -154,4 +155,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    test()

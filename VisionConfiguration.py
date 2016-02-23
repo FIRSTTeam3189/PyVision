@@ -65,22 +65,10 @@ class VisionConfiguration:
     """
 
     def __init__(self, file_location):
-        # Config values
-        self.__one_low = 0
-        self.__one_high = 255
-        self.__two_low = 0
-        self.__two_high = 255
-        self.__three_low = 0
-        self.__three_high = 255
-        self.__kernel_size_close = 1
-        self.__kernel_size_open = 1
-        self.__should_close = True
-        self.__should_open = True
-        self.__should_use_hsv = True
-
         # Configuration file loading
         self.__config = cP.RawConfigParser()
         self.__config.read(file_location)
+        self.__sync()
         self.__default_location = file_location
 
     def set_one_low(self, one):
