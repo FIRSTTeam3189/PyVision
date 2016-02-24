@@ -25,12 +25,15 @@ def clamp(x, low, high):
 
     return x
 
-
 def test():
     print('Version: ' + cv2.__version__)
 
     # Get video capture
     cap = cv2.VideoCapture(0)
+
+    # Set properties of kinect
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+    cap.set(cv2.CAP_PROP_EXPOSURE, 0.0)
 
     # Keys for the window
     window_key = 'Image'
@@ -80,13 +83,12 @@ def test():
         config.set_three_high(b_high)
 
         # Validate Configs
-        config.validate()
+        # config.validate()
 
         processed = vp.process_frame(frame, config)
         hull, biggest_hull = vp.hull_frame(processed, config)
-        cv2.imshow(window_key, hull)
-        # cv2.imshow('Hull', hull)
-        # cv2.imshow('Orig Image', frame)
+        # drawn_image, points = vp.get_polygon_from_hull(biggest_hull, frame)
+        # cv2.imshow(window_key, hull)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

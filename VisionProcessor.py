@@ -11,6 +11,23 @@ logger = logging.getLogger('VisionProcessor')
 
 BIGGEST_HULL_COLOR = (0, 0, 255)
 OTHER_HULL_COLOR = (255, 255, 255)
+POLY_HULL_COLOR = (255, 0, 255)
+
+
+def points_to_numpy_array(point_tuple):
+    """
+    Converts a tuple of (x, y) to a numpy array
+    :param point_tuple: The (x, y) pairs to convert
+    :return: The numpy array
+    """
+    array = np.array([], np.int32)
+
+    for point in point_tuple:
+        array = np.append(array, np.array([point[0], point[1]], np.int32), 0)
+
+    # Reshape into Rows X 1 X 2
+    array = array.reshape((-1, 1, 2))
+    return array
 
 class VisionProcessor:
     """
@@ -61,6 +78,8 @@ class VisionProcessor:
         # Perform operations to clean up image
         open_image = self.__open(image)
         close_image = self.__close(open_image)
+        return close_image, None
+
         crap, contours, h = cv2.findContours(close_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Get size of image and create blacks
@@ -85,6 +104,39 @@ class VisionProcessor:
             hull_image = cv2.drawContours(hull_image, [biggest_hull], -1, BIGGEST_HULL_COLOR, -1)
 
         return hull_image, biggest_hull
+
+    def get_polygon_from_hull(self, hull, image_to_draw_on=None):
+        """
+        Gets the 4 sided polygon from the hull
+        :param hull: The hull to work with
+        :param draw_on_image: If we should draw this on an image
+        :param image_to_draw_on: The image to draw on if we should draw
+        :return: The image if specified, the polygon if found
+        """
+        if hull is None:
+            return None, None
+
+        # Get Extrema
+        left_most = tuple(hull[hull[:, :, 0].argmin()][0])
+        right_most = tuple(hull[hull[:, :, 0].argmax()][0])
+        top_most = tuple(hull[hull[:, :, 1].argmin()][0])
+        bottom_most = tuple(hull[hull[:, :, 1].argmax()][0])
+
+        # Get Points
+        top_left = tuple([left_most[0], top_most[1]])
+        top_right = tuple([right_most[0], top_most[1]])
+        bottom_left = tuple([left_most[0], bottom_most[1]])
+        bottom_right = tuple([right_most[0], bottom_most[1]])
+
+        # Put points in tuple
+        points = tuple([top_left, top_right, bottom_right, bottom_left])
+
+        if image_to_draw_on is not None:
+            # Draw on image if needed
+            poly_array = points_to_numpy_array(points)
+            image_to_draw_on = cv2.polylines(image_to_draw_on, [poly_array], True, POLY_HULL_COLOR, 4)
+
+        return image_to_draw_on, points
 
     def __open(self, image):
         if not self.config.get_should_open():
