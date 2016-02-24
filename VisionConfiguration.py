@@ -21,10 +21,10 @@ PROCESSING_SECTION = "processing"
 SHOULD_CLOSE_KEY = "should_close"
 SHOULD_OPEN_KEY = "should_open"
 SHOULD_USE_HSV_KEY = "should_use_hsv"
-SHOULD_SMOOTH_KEY = "use_bilateral_smooth"
+SHOULD_SMOOTH_KEY = "use_smooth"
 OPEN_KERNEL_KEY = "open_kernel_size"
 CLOSE_KERNEL_KEY = "close_kernel_size"
-SMOOTH_KERNEL_KEY = "bilateral_kernel_size"
+SMOOTH_KERNEL_KEY = "smooth_kernel_size"
 
 # Range values for color range
 MIN_COLOR_VALUE = 0
@@ -32,7 +32,12 @@ MAX_COLOR_VALUE = 255
 
 # Range values for kernel size
 MIN_KERNEL_VALUE = 1
-MAX_KERNEL_VALUE = 10
+MAX_KERNEL_VALUE = 100
+
+# Default values for Processing variables
+DEFAULT_CLOSE_VALUE = 50
+DEFAULT_OPEN_VALUE = 8
+DEFAULT_FILTER_VALUE = 2
 
 # Logger variable
 logger = logging.getLogger("VisionConfiguration")
@@ -44,7 +49,7 @@ def clamp(x, low, high, debug_with=None):
     :param x: Value to clamp
     :param low: Low value
     :param high: High Value
-    :param debugWith: If specified it will debug with the given version
+    :param debug_with: If specified it will debug with the given version
     :return: The clamped value
     """
     if x < low:
@@ -202,7 +207,7 @@ class VisionConfiguration:
         Gets the value of the kernel size as a numpy matrix of 1's of the kernel size by kernel size
         :return: The numpy matrix of the kernel
         """
-        return np.ones((self.__kernel_size_close, self.__kernel_size_close), np.uint8)
+        return np.ones((self.__kernel_size_close, self.__kernel_size_close), dtype=np.uint8)
 
     def get_kernel_size_close(self):
         """
@@ -216,7 +221,7 @@ class VisionConfiguration:
         Gets the value of the kernel size as a numpy matrix of 1's of the kernel size by the kernel size
         :return: The numpy matrix of the kernel
         """
-        return np.ones((self.__kernel_size_open, self.__kernel_size_open), np.uint8)
+        return np.ones((self.__kernel_size_open, self.__kernel_size_open), dtype=np.uint8)
 
     def get_kernel_size_open(self):
         """
@@ -230,7 +235,7 @@ class VisionConfiguration:
         Gets the value of the kernel size as a numpy matrix of 1's of the kernel size by the kernel size
         :return: The numpy matrix of the smoothing kernel
         """
-        return np.ones((self.__kernel_size_smooth, self.__kernel_size_smooth), np.uint8)
+        return np.ones((self.__kernel_size_smooth, self.__kernel_size_smooth), dtype=np.uint8)
 
     def get_kernel_size_smooth(self):
         """
@@ -315,15 +320,15 @@ class VisionConfiguration:
             logger.debug("Blue/Hue high not int, setting to 255")
 
         if type(self.__kernel_size_close) is not int:
-            self.__kernel_size_close = MIN_KERNEL_VALUE
+            self.__kernel_size_close = DEFAULT_CLOSE_VALUE
             logger.debug("Kernel size close not int, setting to 0")
 
         if type(self.__kernel_size_open) is not int:
-            self.__kernel_size_open = MIN_KERNEL_VALUE
+            self.__kernel_size_open = DEFAULT_OPEN_VALUE
             logger.debug("Kernel size open not int, setting to 0")
 
         if type(self.__kernel_size_smooth) is not int:
-            self.__kernel_size_smooth = MIN_KERNEL_VALUE
+            self.__kernel_size_smooth = DEFAULT_FILTER_VALUE
             logger.debug("Kernel size smooth not int, setting to 0")
 
         if type(self.__should_close) is not bool:
@@ -371,9 +376,9 @@ class VisionConfiguration:
             self.__three_high = self.__try_get_key(THRESHOLD_SECTION, THREE_HIGH_KEY, MAX_COLOR_VALUE)
             self.__one_low = self.__try_get_key(THRESHOLD_SECTION, ONE_LOW_KEY, MIN_COLOR_VALUE)
             self.__one_high = self.__try_get_key(THRESHOLD_SECTION, ONE_HIGH_KEY, MAX_COLOR_VALUE)
-            self.__kernel_size_close = self.__try_get_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, MIN_KERNEL_VALUE)
-            self.__kernel_size_open = self.__try_get_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, MIN_KERNEL_VALUE)
-            self.__kernel_size_smooth = self.__try_get_key(PROCESSING_SECTION, SMOOTH_KERNEL_KEY, MIN_KERNEL_VALUE)
+            self.__kernel_size_close = self.__try_get_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, DEFAULT_CLOSE_VALUE)
+            self.__kernel_size_open = self.__try_get_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, DEFAULT_OPEN_VALUE)
+            self.__kernel_size_smooth = self.__try_get_key(PROCESSING_SECTION, SMOOTH_KERNEL_KEY, DEFAULT_FILTER_VALUE)
             self.__should_close = self.__try_get_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, True, True)
             self.__should_open = self.__try_get_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, True, True)
             self.__should_use_hsv = self.__try_get_key(PROCESSING_SECTION, SHOULD_USE_HSV_KEY, True, True)
