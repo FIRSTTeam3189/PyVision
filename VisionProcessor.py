@@ -78,7 +78,6 @@ class VisionProcessor:
         # Perform operations to clean up image
         open_image = self.__open(image)
         close_image = self.__close(open_image)
-        return close_image, None
 
         crap, contours, h = cv2.findContours(close_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 

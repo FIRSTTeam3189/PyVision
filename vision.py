@@ -1,8 +1,9 @@
 import numpy as np
 import cv2
+import timeit
 import VisionConfiguration
 import VisionProcessor
-
+from VisionFrameGrabber import VisionFrameGrabber
 
 def nothing(x):
     pass
@@ -29,11 +30,11 @@ def test():
     print('Version: ' + cv2.__version__)
 
     # Get video capture
-    cap = cv2.VideoCapture(0)
+    cap = VisionFrameGrabber(0, 10).start()
 
     # Set properties of kinect
-    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
-    cap.set(cv2.CAP_PROP_EXPOSURE, 0.0)
+    cap.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+    cap.stream.set(cv2.CAP_PROP_EXPOSURE, 0.0)
 
     # Keys for the window
     window_key = 'Image'
@@ -64,7 +65,7 @@ def test():
     cv2.setTrackbarPos(b_high_key, window_key, config.get_high_range()[2])
 
     while True:
-        ret, frame = cap.read()
+        frame = cap.read()
 
         # Get RGB Values
         r_low = cv2.getTrackbarPos(r_low_key, window_key)
@@ -88,14 +89,29 @@ def test():
         processed = vp.process_frame(frame, config)
         hull, biggest_hull = vp.hull_frame(processed, config)
         # drawn_image, points = vp.get_polygon_from_hull(biggest_hull, frame)
-        # cv2.imshow(window_key, hull)
+        cv2.imshow(window_key, hull)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    cap.release()
+    cap.stop()
+    cap.stream.release()
     cv2.destroyAllWindows()
     print("Closing")
     config.save("settings.conf")
+
+
+def test2():
+    vfg = VisionFrameGrabber(0, 10).start()
+
+    while True:
+        frame = vfg.read()
+        cv2.imshow('Frame', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    vfg.stop()
 
 
 def main():
