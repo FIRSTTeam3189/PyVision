@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import timeit
+import time
 import VisionConfiguration
 import VisionProcessor
 from VisionFrameGrabber import VisionFrameGrabber
@@ -19,7 +20,7 @@ def normalize_points(points, width, height):
     norm = []
 
     for point in points:
-        norm.append([point[0] / float(width), point[1] / float(height)])
+        norm.append([float(point[0]) / float(width), float(point[1]) / float(height)])
 
     return tuple(norm)
 
@@ -34,8 +35,11 @@ def main():
     vfg.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.0)
     vfg.stream.set(cv2.CAP_PROP_EXPOSURE, 0.0)
 
+    table.send_exception_status(False)
+
     while not vfg.stopped:
         try:
+            table.send_is_online(True)
             frame = vfg.read()
 
             height, width, c = frame.shape
@@ -47,15 +51,36 @@ def main():
             if points is not None:
                 normalized = normalize_points(points, width, height)
                 table.send_points(normalized)
-                print('Sent Points')
+
+            if table.get_should_shutdown():
+                vfg.stop()
+
+        except KeyboardInterrupt:
+            vfg.stop()
+            return 69
+        except Exception as e:
+            print(e.args)
+            print(e.message)
+            table.send_exception_status(True)
+            vfg.stop()
         except:
             print(sys.exc_info())
             print(sys.exc_traceback)
+            table.send_exception_status(True)
             vfg.stop()
 
-    vfg.stop()
     print('Shutting Down')
+    if table.get_should_shutdown():
+        # Let table send any data
+        table.send_is_online(False)
+        time.sleep(3)
+        return 69
+
+    # Let network table send any data
+    table.send_is_online(False)
+    time.sleep(3)
+    return 0
 
 if __name__ == '__main__':
-    main()
-    sys.exit(69)
+    code = main()
+    sys.exit(code)
