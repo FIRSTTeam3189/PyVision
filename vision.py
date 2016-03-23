@@ -47,6 +47,7 @@ def main():
             if points is not None:
                 normalized = normalize_points(points, width, height)
                 table.send_points(normalized)
+                print('Sent Points')
         except:
             print(sys.exc_info())
             print(sys.exc_traceback)
@@ -57,3 +58,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    sys.exit(69)

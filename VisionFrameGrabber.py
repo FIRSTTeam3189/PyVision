@@ -9,6 +9,7 @@ logger = logging.getLogger('VisionFrameGrabber')
 
 READ_FAILS_TIL_SHUTDOWN = 5
 
+
 def get_start_point(directory=None):
     if directory is None:
         directory = '.'
