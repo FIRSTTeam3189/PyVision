@@ -4,6 +4,7 @@ import timeit
 import VisionConfiguration
 import VisionProcessor
 from VisionFrameGrabber import VisionFrameGrabber
+import VisionTable
 
 def nothing(x):
     pass
@@ -25,6 +26,23 @@ def clamp(x, low, high):
         x = high
 
     return x
+
+
+def normalize_points(points, width, height):
+    '''
+    Normalizes a set of points
+    :param points: The points
+    :param width: Width
+    :param height: Height
+    :return: The normalized points
+    '''
+    norm = []
+
+    for point in points:
+        norm.append([point[0] / float(width), point[1] / float(height)])
+
+    return tuple(norm)
+
 
 def test():
     print('Version: ' + cv2.__version__)
@@ -66,7 +84,6 @@ def test():
 
     while True:
         frame = cap.read()
-        start = timeit.default_timer()
 
         # Get RGB Values
         r_low = cv2.getTrackbarPos(r_low_key, window_key)
@@ -91,8 +108,7 @@ def test():
         hull, biggest_hull = vp.hull_frame(processed, config)
         drawn_image, points = vp.get_polygon_from_hull(biggest_hull, frame)
         cv2.imshow(window_key, drawn_image)
-        elapsed = timeit.default_timer() - start
-        print(elapsed)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -116,8 +132,32 @@ def test2():
 
 
 def main():
-    pass
+    vfg = VisionFrameGrabber(0, 5).start()
+    config = VisionConfiguration.VisionConfiguration("settings.conf")
+    vp = VisionProcessor.VisionProcessor(config)
+    table = VisionTable.VisionTable('Vision')
 
+    # Set properties of kinect
+    # vfg.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+    # vfg.stream.set(cv2.CAP_PROP_EXPOSURE, 0.0)
+
+    while True:
+        print('Did Shit')
+        frame = vfg.read()
+
+        height, width, c = frame.shape
+
+        processed = vp.process_frame(frame, config)
+        hull, biggest_hull = vp.hull_frame(processed, config, False)
+        drawn_image, points = vp.get_polygon_from_hull(biggest_hull)
+
+        if points is not None:
+            normalized = normalize_points(points, width, height)
+            table.send_points(normalized)
+            print(normalized)
+
+    vfg.stop()
+    print('Shutting Down')
 
 if __name__ == '__main__':
-    test()
+    main()

@@ -79,7 +79,10 @@ class VisionProcessor:
         open_image = self.__open(image)
         close_image = self.__close(open_image)
 
-        crap, contours, h = cv2.findContours(close_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if cv2.__version__ == "2.4.1":
+            contours, h = cv2.findContours(close_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        else:
+            crap, contours, h = cv2.findContours(close_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Get size of image and create blacks
         width, height = close_image.shape
@@ -99,7 +102,7 @@ class VisionProcessor:
                 hull_image = cv2.drawContours(hull_image, [hull], -1, OTHER_HULL_COLOR, -1)
 
         # Draw the largest hull if we aren't drawing all of the hulls and it isn't None
-        if biggest_hull is not None:
+        if biggest_hull is not None and draw_all_hulls:
             hull_image = cv2.drawContours(hull_image, [biggest_hull], -1, BIGGEST_HULL_COLOR, -1)
 
         return hull_image, biggest_hull
@@ -121,7 +124,7 @@ class VisionProcessor:
 
         # We don't are unless it's a rect
         if len(approx) != 4:
-            return
+            return image_to_draw_on, None
 
         poly = tuple(approx[:, 0])
 
