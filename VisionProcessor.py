@@ -113,29 +113,23 @@ class VisionProcessor:
         :return: The image if specified, the polygon if found
         """
         if hull is None:
-            return None, None
+            return image_to_draw_on, None
 
-        # Get Extrema
-        left_most = tuple(hull[hull[:, :, 0].argmin()][0])
-        right_most = tuple(hull[hull[:, :, 0].argmax()][0])
-        top_most = tuple(hull[hull[:, :, 1].argmin()][0])
-        bottom_most = tuple(hull[hull[:, :, 1].argmax()][0])
+        # Get Poly
+        arc_length = cv2.arcLength(hull, True)
+        approx = cv2.approxPolyDP(hull, arc_length * .08, True)
 
-        # Get Points
-        top_left = tuple([left_most[0], top_most[1]])
-        top_right = tuple([right_most[0], top_most[1]])
-        bottom_left = tuple([left_most[0], bottom_most[1]])
-        bottom_right = tuple([right_most[0], bottom_most[1]])
+        # We don't are unless it's a rect
+        if len(approx) != 4:
+            return
 
-        # Put points in tuple
-        points = tuple([top_left, top_right, bottom_right, bottom_left])
+        poly = tuple(approx[:, 0])
 
         if image_to_draw_on is not None:
             # Draw on image if needed
-            poly_array = points_to_numpy_array(points)
-            image_to_draw_on = cv2.polylines(image_to_draw_on, [poly_array], True, POLY_HULL_COLOR, 4)
+            image_to_draw_on = cv2.drawContours(image_to_draw_on, [approx], -1, POLY_HULL_COLOR, 4)
 
-        return image_to_draw_on, points
+        return image_to_draw_on, poly
 
     def __open(self, image):
         if not self.config.get_should_open():

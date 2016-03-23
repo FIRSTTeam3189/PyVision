@@ -66,6 +66,7 @@ def test():
 
     while True:
         frame = cap.read()
+        start = timeit.default_timer()
 
         # Get RGB Values
         r_low = cv2.getTrackbarPos(r_low_key, window_key)
@@ -88,14 +89,14 @@ def test():
 
         processed = vp.process_frame(frame, config)
         hull, biggest_hull = vp.hull_frame(processed, config)
-        # drawn_image, points = vp.get_polygon_from_hull(biggest_hull, frame)
-        cv2.imshow(window_key, hull)
-
+        drawn_image, points = vp.get_polygon_from_hull(biggest_hull, frame)
+        cv2.imshow(window_key, drawn_image)
+        elapsed = timeit.default_timer() - start
+        print(elapsed)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.stop()
-    cap.stream.release()
     cv2.destroyAllWindows()
     print("Closing")
     config.save("settings.conf")

@@ -35,7 +35,8 @@ class VisionFrameGrabber:
     def __init__(self, src=0, save_frames=0):
         self.stopped = False
         self.stream = cv2.VideoCapture(src)
-        (self.grabbed, self.frame) = self.stream.read()
+        (self.grabbed, frame) = self.stream.read()
+        self.frame = cv2.flip(frame, 0)
         self.should_save_frames = False
         self.current_frame = 0
         self.start_frame = 0
@@ -64,7 +65,7 @@ class VisionFrameGrabber:
         '''
         while True:
             if self.stopped:
-                return
+                break
 
             (self.grabbed, self.frame) = self.stream.read()
 
@@ -82,6 +83,8 @@ class VisionFrameGrabber:
                     self.save_frames += self.save_frames - self.start_frame
                     self.start_frame = temp
                     self.should_save_frames = False
+
+        self.stream.release()
 
     def stop(self):
         '''

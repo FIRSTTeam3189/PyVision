@@ -36,7 +36,7 @@ MAX_KERNEL_VALUE = 100
 
 # Default values for Processing variables
 DEFAULT_CLOSE_VALUE = 50
-DEFAULT_OPEN_VALUE = 8
+DEFAULT_OPEN_VALUE = 5
 DEFAULT_FILTER_VALUE = 2
 
 # Logger variable
@@ -379,10 +379,10 @@ class VisionConfiguration:
             self.__kernel_size_close = self.__try_get_key(PROCESSING_SECTION, CLOSE_KERNEL_KEY, DEFAULT_CLOSE_VALUE)
             self.__kernel_size_open = self.__try_get_key(PROCESSING_SECTION, OPEN_KERNEL_KEY, DEFAULT_OPEN_VALUE)
             self.__kernel_size_smooth = self.__try_get_key(PROCESSING_SECTION, SMOOTH_KERNEL_KEY, DEFAULT_FILTER_VALUE)
-            self.__should_close = self.__try_get_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, True, True)
+            self.__should_close = self.__try_get_key(PROCESSING_SECTION, SHOULD_CLOSE_KEY, False, True)
             self.__should_open = self.__try_get_key(PROCESSING_SECTION, SHOULD_OPEN_KEY, True, True)
             self.__should_use_hsv = self.__try_get_key(PROCESSING_SECTION, SHOULD_USE_HSV_KEY, True, True)
-            self.__should_use_smoothing = self.__try_get_key(PROCESSING_SECTION, SHOULD_SMOOTH_KEY, True, True)
+            self.__should_use_smoothing = self.__try_get_key(PROCESSING_SECTION, SHOULD_SMOOTH_KEY, False, True)
         else:
             # Sets the values to the config
             self.__set_key(THRESHOLD_SECTION, TWO_LOW_KEY, self.__two_low)
