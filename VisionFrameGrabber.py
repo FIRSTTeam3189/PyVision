@@ -7,6 +7,7 @@ from VisionConfiguration import VisionConfiguration
 
 logger = logging.getLogger('VisionFrameGrabber')
 
+READ_FAILS_TIL_SHUTDOWN = 5
 
 def get_start_point(directory=None):
     if directory is None:
@@ -40,6 +41,7 @@ class VisionFrameGrabber:
         self.should_save_frames = False
         self.current_frame = 0
         self.start_frame = 0
+        self.read_fails = 0
 
         if save_frames > 0:
             self.start_frame = get_start_point()
@@ -68,6 +70,18 @@ class VisionFrameGrabber:
                 break
 
             (self.grabbed, self.frame) = self.stream.read()
+
+            # Keep track if we are actually reading frames, and if not, shutdown after
+            # Five failed reads
+            if not self.grabbed:
+                self.read_fails += 1
+            else:
+                self.read_fails = 0
+
+            print(self.frame)
+
+            if self.read_fails > READ_FAILS_TIL_SHUTDOWN:
+                self.stop()
 
             # See if we should save frames
             if self.should_save_frames:
