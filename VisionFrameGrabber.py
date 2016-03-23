@@ -78,8 +78,6 @@ class VisionFrameGrabber:
             else:
                 self.read_fails = 0
 
-            print(self.frame)
-
             if self.read_fails > READ_FAILS_TIL_SHUTDOWN:
                 self.stop()
 
