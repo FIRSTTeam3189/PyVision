@@ -30,9 +30,9 @@ def get_start_point(directory=None):
 
 
 class VisionFrameGrabber:
-    '''
+    """
     This is for grabbing frames in a separate thread
-    '''
+    """
 
     def __init__(self, src=0, save_frames=0):
         self.stopped = False
@@ -50,22 +50,22 @@ class VisionFrameGrabber:
             self.save_frames = save_frames + self.start_frame
 
     def start(self):
-        '''
+        """
         This starts the frame grabber process
-        '''
+        """
         Thread(target=self.update, args=()).start()
         return self
 
     def read(self):
-        '''
+        """
         This grabs the latest frame from the frame grabber
-        '''
+        """
         return self.frame
 
     def update(self):
-        '''
+        """
         This is called to update the frame grabber
-        '''
+        """
         while True:
             if self.stopped:
                 break
@@ -100,7 +100,7 @@ class VisionFrameGrabber:
         self.stream.release()
 
     def stop(self):
-        '''
+        """
         This stops the frame grabber
-        '''
+        """
         self.stopped = True
