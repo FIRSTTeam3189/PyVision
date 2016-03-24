@@ -1,11 +1,12 @@
 import numpy as np
 import cv2
-import timeit
+import threading
 import time
 import VisionConfiguration
 import VisionProcessor
 from VisionFrameGrabber import VisionFrameGrabber
 import VisionTable
+import VisionServer
 import sys
 
 
@@ -31,14 +32,33 @@ def main():
     vp = VisionProcessor.VisionProcessor(config)
     table = VisionTable.VisionTable('Vision')
 
+    # Setup streaming server
+    address = ('0.0.0.0', 4269)
+    try:
+        VisionServer.frame_grabber = vfg
+        server = VisionServer.VisionServer(address, VisionServer.VisionHandler)
+        t = threading.Thread(target=server.serve_forever)
+        t.setDaemon(True)
+        t.start()
+    except Exception as e:
+        print(e.args)
+        print(e.message)
+
+        # Stop all the things
+        vfg.stop()
+        table.send_exception_status(True)
+    except:
+        # Stop all the things
+        vfg.stop()
+        table.send_exception_status(True)
+
     # Set properties of kinect
     vfg.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.0)
     vfg.stream.set(cv2.CAP_PROP_EXPOSURE, 0.0)
 
-    table.send_exception_status(False)
-
     while not vfg.stopped:
         try:
+            table.send_exception_status(False)
             table.send_is_online(True)
             frame = vfg.read()
 
@@ -70,6 +90,7 @@ def main():
             vfg.stop()
 
     print('Shutting Down')
+    server.socket.close()
     if table.get_should_shutdown():
         # Let table send any data
         table.send_is_online(False)
