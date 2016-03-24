@@ -25,7 +25,7 @@ class VisionStream:
                     ret, image_bytes = cv2.imencode('.jpg', self.frame_grabber.read())
                     if not ret:
                         # Failed to encode image, send empty string
-                        self.socket.send(0)
+                        self.socket.send(struct.pack('i', int(len(0))))
                     else:
                         self.socket.send(struct.pack('i', int(len(image_bytes))))
                         self.socket.send(image_bytes)
@@ -33,7 +33,7 @@ class VisionStream:
                     # Close the socket by breaking
                     break
                 else:
-                    time.sleep(.1)
+                    time.sleep(.01)
                     print('Got unknown command %d' % command)
 
         except IOError as e:
