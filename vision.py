@@ -9,6 +9,7 @@ import VisionTable
 import VisionServer
 import sys
 
+log_file = 'run.log'
 
 def normalize_points(points, width, height):
     '''
@@ -27,6 +28,9 @@ def normalize_points(points, width, height):
 
 
 def main():
+    with open(log_file, 'a') as f:
+        f.write('Server Started')
+
     vfg = VisionFrameGrabber(0, 5).start()
     config = VisionConfiguration.VisionConfiguration("settings.conf")
     vp = VisionProcessor.VisionProcessor(config)
@@ -47,14 +51,25 @@ def main():
         # Stop all the things
         vfg.stop()
         table.send_exception_status(True)
+        with open(log_file, 'a') as f:
+            f.write('Failed to open stream server')
     except:
         # Stop all the things
         vfg.stop()
         table.send_exception_status(True)
 
+    with open(log_file, 'a') as f:
+        f.write('Initialized Server')
+        with open(log_file, 'a') as f:
+            f.write('Failed to open stream server')
+
     # Set properties of kinect
     vfg.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.0)
     vfg.stream.set(cv2.CAP_PROP_EXPOSURE, 0.0)
+
+    if not vfg.stopped:
+        with open(log_file, 'a') as f:
+            f.write('Failed to Start server')
 
     while not vfg.stopped:
         try:
@@ -83,23 +98,33 @@ def main():
             print(e.message)
             table.send_exception_status(True)
             vfg.stop()
+            with open(log_file, 'a') as f:
+                f.write('Exception Processing vision')
+                f.write(e.args)
+                f.write(e.message)
         except:
             print(sys.exc_info())
             print(sys.exc_traceback)
             table.send_exception_status(True)
             vfg.stop()
+            with open(log_file, 'a') as f:
+                f.write('Exception Processing vision')
+                f.write(sys.exc_info())
+                f.write(sys.exc_traceback)
 
-    print('Shutting Down')
-    server.socket.close()
+    with open(log_file, 'a') as f:
+        f.write('Server shutting down')
     if table.get_should_shutdown():
         # Let table send any data
         table.send_is_online(False)
         time.sleep(3)
+        server.socket.close()
         return 69
 
     # Let network table send any data
     table.send_is_online(False)
     time.sleep(3)
+    server.socket.close()
     return 0
 
 if __name__ == '__main__':
