@@ -46,7 +46,7 @@ class VisionFrameGrabber:
 
         if save_frames > 0:
             self.start_frame = get_start_point()
-            self.should_save_frames = True
+            self.should_save_frames = False
             self.save_frames = save_frames + self.start_frame
 
     def start(self):
@@ -61,6 +61,12 @@ class VisionFrameGrabber:
         This grabs the latest frame from the frame grabber
         """
         return self.frame
+
+    def should_save_frames(self, should_save):
+        """
+        Sets if the kinect should save some frames
+        """
+        self.should_save_frames = should_save
 
     def update(self):
         """

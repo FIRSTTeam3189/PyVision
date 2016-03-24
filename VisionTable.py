@@ -18,6 +18,7 @@ POINT_FOUR_Y = 'foury'
 SHOULD_SHUTDOWN = 'shutdown'
 EXCEPTION_THROWN = 'exception'
 IS_ONLINE = 'online'
+TAKE_SNAPSHOT = 'snapshot'
 
 class VisionTable:
     def __init__(self, table_name):
@@ -63,3 +64,16 @@ class VisionTable:
         :return: If the Server should shutdown
         """
         return self.table.getBoolean(SHOULD_SHUTDOWN, False)
+
+    def get_should_snapshot(self):
+        """
+        Gets if the server should take pictures
+        :return: If the Server should take pictures
+        """
+        return self.table.getBoolean(TAKE_SNAPSHOT, False)
+
+    def send_should_snapshot(self, should_snapshot):
+        """
+        Sets if the vision should snapshot
+        """
+        self.table.putBoolean(TAKE_SNAPSHOT, should_snapshot)

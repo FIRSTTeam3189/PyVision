@@ -58,8 +58,14 @@ def main():
                 normalized = normalize_points(points, width, height)
                 table.send_points(normalized)
 
+            # Get if we should shut down
             if table.get_should_shutdown():
                 vfg.stop()
+
+            # Get if we should save frames
+            if table.get_should_snapshot():
+                vfg.should_save_frames(True)
+                table.send_should_snapshot(False)
 
         except KeyboardInterrupt:
             vfg.stop()
