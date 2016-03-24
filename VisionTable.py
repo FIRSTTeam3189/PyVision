@@ -2,6 +2,8 @@ from networktables import NetworkTable
 
 ip = "roboRIO-3189-FRC.local"
 
+network_log_file = 'net.log'
+
 NetworkTable.setClientMode()
 NetworkTable.setIPAddress(ip)
 NetworkTable.initialize()
@@ -19,10 +21,23 @@ SHOULD_SHUTDOWN = 'shutdown'
 EXCEPTION_THROWN = 'exception'
 IS_ONLINE = 'online'
 TAKE_SNAPSHOT = 'snapshot'
+LOOP_AMOUNT = 'loops'
+
+
+class ConnectionListener:
+    def connected(self, table):
+        with file(network_log_file, 'a') as f:
+            f.write('Connected to network table.\n')
+
+    def disconnected(self, table):
+        with file(network_log_file, 'a') as f:
+            f.write('Disconnected from network table.\n')
+
 
 class VisionTable:
     def __init__(self, table_name):
         self.table = NetworkTable.getTable(table_name)
+        self.table.addConnectionListener(ConnectionListener())
 
     def send_points(self, points):
         for i in xrange(0, 4):
@@ -77,3 +92,9 @@ class VisionTable:
         Sets if the vision should snapshot
         """
         self.table.putBoolean(TAKE_SNAPSHOT, should_snapshot)
+
+    def send_loops(self, loops):
+        """
+        Puts to the table how many loops we've done
+        """
+        self.table.putNumber(LOOP_AMOUNT, loops)

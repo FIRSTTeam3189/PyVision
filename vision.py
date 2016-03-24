@@ -42,6 +42,8 @@ def main():
         with open(log_file, 'a') as f:
             f.write('Starting Vision Processing\n')
 
+    loops = 0
+
     while not vfg.stopped:
         try:
             table.send_exception_status(False)
@@ -66,6 +68,9 @@ def main():
             if table.get_should_snapshot():
                 vfg.should_save_frames(True)
                 table.send_should_snapshot(False)
+
+            loops += 1
+            table.send_loops(loops)
 
         except KeyboardInterrupt:
             vfg.stop()
