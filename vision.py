@@ -66,8 +66,12 @@ def main():
 
             # Get if we should save frames
             if table.get_should_snapshot():
-                vfg.should_save_frames(True)
+                vfg.set_should_save_frames(True)
                 table.send_should_snapshot(False)
+                with open(log_file, 'a') as f:
+                    f.write('Setting save frames true\n')
+
+                print('Saving Images')
 
             loops += 1
             table.send_loops(loops)
@@ -102,6 +106,8 @@ def main():
         # Let table send any data
         table.send_is_online(False)
         time.sleep(3)
+        with open(log_file, 'a') as f:
+            f.write('Pi should shutdown\n')
         return 69
 
     # Let network table send any data

@@ -62,7 +62,7 @@ class VisionFrameGrabber:
         """
         return self.frame
 
-    def should_save_frames(self, should_save):
+    def set_should_save_frames(self, should_save):
         """
         Sets if the kinect should save some frames
         """
